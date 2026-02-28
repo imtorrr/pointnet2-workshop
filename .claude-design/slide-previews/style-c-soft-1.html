@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Style C: Soft Indigo</title>
+    <link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=satoshi:400,500,700&f[]=commissioner:600,700">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --bg-light: #f8f6fb;
+            --grid-light: rgba(99, 102, 241, 0.03);
+            --text-light: #3a3a4a;
+            --accent: #7c6eb5;
+
+            --bg-dark: #1a1a2e;
+            --grid-dark: rgba(124, 110, 181, 0.1);
+            --text-dark: #f5f5f5;
+        }
+
+        body {
+            font-family: 'Satoshi', sans-serif;
+            background: var(--bg-light);
+            background-image:
+                linear-gradient(var(--grid-light) 1px, transparent 1px),
+                linear-gradient(90deg, var(--grid-light) 1px, transparent 1px);
+            background-size: 50px 50px;
+            color: var(--text-light);
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        body.dark-mode {
+            background-color: var(--bg-dark);
+            background-image:
+                linear-gradient(var(--grid-dark) 1px, transparent 1px),
+                linear-gradient(90deg, var(--grid-dark) 1px, transparent 1px);
+            color: var(--text-dark);
+        }
+
+        .preview-container {
+            width: 100%;
+            max-width: 1200px;
+            padding: 4rem;
+            border-radius: 12px;
+            background: var(--bg-light);
+            border: 2px solid var(--accent);
+            position: relative;
+        }
+
+        body.dark-mode .preview-container {
+            background: var(--bg-dark);
+            border-color: var(--accent);
+        }
+
+        .toggle-btn {
+            position: absolute;
+            top: 1.5rem;
+            right: 1.5rem;
+            padding: 0.5rem 1rem;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.875rem;
+        }
+
+        h1 {
+            font-family: 'Commissioner', sans-serif;
+            font-size: 3.5rem;
+            line-height: 1.15;
+            margin-bottom: 1rem;
+            letter-spacing: -0.5px;
+            color: var(--accent);
+        }
+
+        .subtitle {
+            font-size: 1.25rem;
+            line-height: 1.6;
+            opacity: 0.75;
+            margin-top: 1.5rem;
+        }
+
+        .grid-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .card {
+            padding: 1.5rem;
+            border: 1px solid var(--accent);
+            border-radius: 8px;
+            background: transparent;
+            text-align: center;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--accent);
+            transition: all 0.3s;
+        }
+
+        .card:hover {
+            background: var(--accent);
+            color: white;
+        }
+
+        .accent-line {
+            height: 3px;
+            width: 60px;
+            background: var(--accent);
+            margin: 1rem 0;
+        }
+
+        .color-info {
+            margin-top: 2rem;
+            padding: 1rem;
+            background: var(--accent);
+            color: white;
+            border-radius: 8px;
+            font-size: 0.875rem;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h1 { animation: slideIn 0.6s ease-out; }
+        .subtitle { animation: slideIn 0.6s ease-out 0.1s both; }
+        .grid-cards { animation: slideIn 0.6s ease-out 0.2s both; }
+    </style>
+</head>
+<body>
+    <button class="toggle-btn" onclick="toggleDarkMode()">🌙 Dark</button>
+
+    <div class="preview-container">
+        <h1>Soft Indigo</h1>
+        <div class="accent-line"></div>
+        <p class="subtitle">Calm, sophisticated, and easy on the eyes. Perfect for serious technical content.</p>
+
+        <div class="grid-cards">
+            <div class="card">💡 Clear</div>
+            <div class="card">🎯 Focused</div>
+            <div class="card">✨ Elegant</div>
+            <div class="card">📊 Professional</div>
+        </div>
+
+        <div class="color-info">
+            🎨 Accent Color: Soft Indigo (#7c6eb5)
+        </div>
+    </div>
+
+    <script>
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark-mode');
+            const btn = document.querySelector('.toggle-btn');
+            btn.textContent = document.body.classList.contains('dark-mode') ? '☀️ Light' : '🌙 Dark';
+        }
+    </script>
+</body>
+</html>

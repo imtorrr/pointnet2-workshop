@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Retro: Monochrome Gray</title>
+    <link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=figtree:600,700,800&f[]=fira-sans:500,600,700">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --bg-light: #f0f0f0;
+            --bg-card: #e8e8e8;
+            --text-light: #1f1f1f;
+            --border-light: #5a5a5a;
+
+            --bg-dark: #2a2a2a;
+            --bg-card-dark: #383838;
+            --text-dark: #e5e5e5;
+            --border-dark: #9a9a9a;
+        }
+
+        body {
+            font-family: 'Figtree', sans-serif;
+            background: var(--bg-light);
+            color: var(--text-light);
+            transition: background 0.3s, color 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        body.dark-mode {
+            background: var(--bg-dark);
+            color: var(--text-dark);
+        }
+
+        .preview-container {
+            width: 100%;
+            max-width: 1200px;
+            padding: 4rem;
+            border: 3px solid var(--border-light);
+            border-radius: 16px;
+            position: relative;
+            background: var(--bg-light);
+        }
+
+        body.dark-mode .preview-container {
+            background: var(--bg-dark);
+            border-color: var(--border-dark);
+        }
+
+        .toggle-btn {
+            position: absolute;
+            top: 1.5rem;
+            right: 1.5rem;
+            padding: 0.7rem 1.5rem;
+            background: var(--text-light);
+            color: var(--bg-light);
+            border: 2px solid var(--text-light);
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 0.8rem;
+            font-family: 'Fira Sans', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+        }
+
+        body.dark-mode .toggle-btn {
+            background: var(--text-dark);
+            color: var(--bg-dark);
+            border-color: var(--text-dark);
+        }
+
+        h1 {
+            font-family: 'Figtree', sans-serif;
+            font-size: 3.8rem;
+            line-height: 1;
+            margin-bottom: 0.75rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+
+        .subtitle {
+            font-family: 'Fira Sans', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            opacity: 0.75;
+            margin-bottom: 2rem;
+        }
+
+        p {
+            font-size: 1.1rem;
+            line-height: 1.7;
+            margin-top: 1.5rem;
+            font-weight: 500;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.25rem;
+            margin-top: 2rem;
+        }
+
+        .feature-card {
+            padding: 1.5rem;
+            border: 2px solid var(--border-light);
+            background: var(--bg-card);
+            font-weight: 700;
+            font-size: 0.9rem;
+            border-radius: 12px;
+        }
+
+        body.dark-mode .feature-card {
+            border-color: var(--border-dark);
+            background: var(--bg-card-dark);
+        }
+
+        .feature-card .icon {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .divider {
+            width: 40px;
+            height: 3px;
+            background: var(--border-light);
+            margin: 1.5rem 0 2rem 0;
+        }
+
+        body.dark-mode .divider {
+            background: var(--border-dark);
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h1 { animation: slideIn 0.6s ease-out; }
+        p { animation: slideIn 0.6s ease-out 0.1s both; }
+        .feature-grid { animation: slideIn 0.6s ease-out 0.2s both; }
+    </style>
+</head>
+<body>
+    <button class="toggle-btn" onclick="toggleDarkMode()">◐ MODE</button>
+
+    <div class="preview-container">
+        <h1>MONOCHROME</h1>
+        <div class="subtitle">Timeless Grayscale</div>
+        <div class="divider"></div>
+
+        <p>Pure grayscale palette. Bold, confident typography. Works beautifully in any lighting.</p>
+
+        <div class="feature-grid">
+            <div class="feature-card">
+                <div class="icon">▪</div>
+                <strong>Neutral</strong>
+            </div>
+            <div class="feature-card">
+                <div class="icon">▬</div>
+                <strong>Timeless</strong>
+            </div>
+            <div class="feature-card">
+                <div class="icon">◾</div>
+                <strong>Bold</strong>
+            </div>
+            <div class="feature-card">
+                <div class="icon">⬜</div>
+                <strong>Clean</strong>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark-mode');
+        }
+    </script>
+</body>
+</html>

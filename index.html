@@ -1,0 +1,1295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Point Cloud Workshop - 16-Bit Enhanced</title>
+    <link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=figtree:600,700,800">
+    <style>
+        /* ===========================================
+           CORE STYLES
+           =========================================== */
+        html, body {
+            height: 100%;
+            overflow-x: hidden;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-snap-type: y mandatory;
+            scroll-behavior: smooth;
+        }
+
+        :root {
+            --bg-light: #ffffff;
+            --text-light: #000000;
+            --border-light: #333333;
+            --accent-light: #f0f0f0;
+            --accent-light-2: #e8e8e8;
+
+            --bg-dark: #1a1a1a;
+            --text-dark: #ffffff;
+            --border-dark: #cccccc;
+            --accent-dark: #2a2a2a;
+            --accent-dark-2: #383838;
+
+            --title-size: clamp(2rem, 6vw, 3.5rem);
+            --h2-size: clamp(1.4rem, 4vw, 2.2rem);
+            --h3-size: clamp(1rem, 2.5vw, 1.5rem);
+            --body-size: clamp(0.85rem, 1.3vw, 1rem);
+            --small-size: clamp(0.7rem, 0.9vw, 0.85rem);
+
+            --slide-padding: clamp(2rem, 4vw, 3.5rem);
+            --content-gap: clamp(0.8rem, 1.8vw, 1.8rem);
+            --element-gap: clamp(0.4rem, 0.8vw, 1rem);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Figtree', sans-serif;
+            background: var(--bg-light);
+            color: var(--text-light);
+            transition: background 0.4s, color 0.4s;
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+        }
+
+        body.dark-mode {
+            background: var(--bg-dark);
+            color: var(--text-dark);
+        }
+
+        /* Scan lines */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0, 0, 0, 0.03),
+                rgba(0, 0, 0, 0.03) 2px,
+                transparent 2px,
+                transparent 4px
+            );
+            z-index: 999;
+        }
+
+        /* ===========================================
+           SLIDE LAYOUT
+           =========================================== */
+        .slide {
+            width: 100vw;
+            height: 100vh;
+            height: 100dvh;
+            overflow: hidden;
+            scroll-snap-align: start;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            padding: var(--slide-padding);
+        }
+
+        .slide-content {
+            width: 100%;
+            max-width: min(92vw, 1150px);
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        /* ===========================================
+           CONTROLS
+           =========================================== */
+        .mode-toggle {
+            position: fixed;
+            top: 2rem;
+            right: 2rem;
+            padding: 0.8rem 1.6rem;
+            background: var(--text-light);
+            color: var(--bg-light);
+            border: 3px solid var(--text-light);
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 800;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 3px 3px 0 rgba(0,0,0,0.2);
+            transition: all 0.1s;
+            z-index: 1000;
+            font-family: 'Figtree', sans-serif;
+        }
+
+        .mode-toggle:active {
+            transform: translate(1px, 1px);
+        }
+
+        body.dark-mode .mode-toggle {
+            background: var(--text-dark);
+            color: var(--bg-dark);
+            border-color: var(--text-dark);
+        }
+
+        /* ===========================================
+           TYPOGRAPHY
+           =========================================== */
+        h1 {
+            font-size: var(--title-size);
+            font-weight: 800;
+            line-height: 1;
+            letter-spacing: -1px;
+            margin-bottom: var(--element-gap);
+            text-shadow: 2px 2px 0 rgba(0,0,0,0.1);
+        }
+
+        body.dark-mode h1 {
+            text-shadow: 2px 2px 0 rgba(255,255,255,0.1);
+        }
+
+        h2 {
+            font-size: var(--h2-size);
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: var(--content-gap);
+        }
+
+        h3 {
+            font-size: var(--h3-size);
+            font-weight: 800;
+            margin-bottom: var(--element-gap);
+        }
+
+        p {
+            font-size: var(--body-size);
+            line-height: 1.7;
+            font-weight: 600;
+            margin-bottom: var(--element-gap);
+        }
+
+        li {
+            font-size: var(--body-size);
+            line-height: 1.8;
+            font-weight: 600;
+            margin-left: 1.5rem;
+            margin-bottom: var(--element-gap);
+        }
+
+        .subtitle {
+            font-size: var(--body-size);
+            opacity: 0.8;
+            font-weight: 600;
+            margin-bottom: var(--element-gap);
+        }
+
+        strong {
+            font-weight: 800;
+        }
+
+        /* ===========================================
+           CONTENT CARDS & LAYOUTS
+           =========================================== */
+        .divider {
+            width: 100%;
+            height: 5px;
+            background: var(--text-light);
+            margin: var(--content-gap) 0;
+            box-shadow: 2px 2px 0 rgba(0,0,0,0.2);
+            border-radius: 2px;
+        }
+
+        body.dark-mode .divider {
+            background: var(--text-dark);
+            box-shadow: 2px 2px 0 rgba(255,255,255,0.2);
+        }
+
+        .divider-small {
+            width: 60px;
+            height: 3px;
+            background: var(--text-light);
+            margin: var(--element-gap) 0;
+        }
+
+        body.dark-mode .divider-small {
+            background: var(--text-dark);
+        }
+
+        /* Feature lists */
+        .feature-list {
+            display: flex;
+            flex-direction: column;
+            gap: var(--element-gap);
+        }
+
+        .feature-item {
+            padding: 1rem 1.5rem;
+            border: 3px solid var(--border-light);
+            border-radius: 12px;
+            background: transparent;
+            font-weight: 700;
+            box-shadow: 3px 3px 0 rgba(0,0,0,0.1);
+            transition: all 0.1s;
+        }
+
+        body.dark-mode .feature-item {
+            border-color: var(--border-dark);
+            box-shadow: 3px 3px 0 rgba(255,255,255,0.1);
+        }
+
+        .feature-item:hover {
+            transform: translate(-1px, -1px);
+            box-shadow: 4px 4px 0 rgba(0,0,0,0.15);
+        }
+
+        .feature-item-title {
+            font-weight: 800;
+            font-size: 0.95rem;
+            margin-bottom: 0.4rem;
+        }
+
+        /* Resource Links - Hide blue color and add hover effects */
+        .resource-link {
+            text-decoration: none;
+            color: inherit;
+            display: block;
+            transition: all 0.2s ease;
+        }
+
+        .resource-link:hover .feature-item {
+            background: var(--accent-light-2);
+            border-color: var(--border-light);
+            box-shadow: 5px 5px 0 rgba(0,0,0,0.25);
+        }
+
+        body.dark-mode .resource-link:hover .feature-item {
+            background: var(--accent-dark-2);
+            border-color: var(--border-dark);
+            box-shadow: 5px 5px 0 rgba(255,255,255,0.2);
+        }
+
+        .resource-link:visited {
+            color: inherit;
+        }
+
+        .feature-item-desc {
+            font-size: 0.9rem;
+            opacity: 0.85;
+            font-weight: 600;
+        }
+
+        /* Reference Images */
+        .ref-img {
+            max-width: 100%;
+            max-height: 140px;
+            object-fit: contain;
+            border: 2px solid var(--border-light);
+            border-radius: 8px;
+            padding: 0.5rem;
+            background: var(--accent-light);
+            transition: all 0.2s ease;
+        }
+
+        body.dark-mode .ref-img {
+            border-color: var(--border-dark);
+            background: var(--accent-dark);
+        }
+
+        .ref-img:hover {
+            border-color: var(--border-light);
+            box-shadow: 3px 3px 0 rgba(0,0,0,0.2);
+        }
+
+        body.dark-mode .ref-img:hover {
+            box-shadow: 3px 3px 0 rgba(255,255,255,0.15);
+        }
+
+        /* Image Lightbox/Zoom Modal */
+        .image-lightbox {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.25s ease;
+        }
+
+        .image-lightbox.active {
+            opacity: 1;
+        }
+
+        .lightbox-image {
+            max-width: 85vw;
+            max-height: 85vh;
+            object-fit: contain;
+            border: 4px solid var(--border-light);
+            border-radius: 12px;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+            animation: zoomIn 0.3s ease;
+        }
+
+        body.dark-mode .lightbox-image {
+            border-color: var(--border-dark);
+        }
+
+        @keyframes zoomIn {
+            from {
+                transform: scale(0.8);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        /* Grids */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
+            gap: var(--content-gap);
+            margin: var(--content-gap) 0;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+            gap: var(--content-gap);
+            margin: var(--content-gap) 0;
+        }
+
+        .card {
+            padding: 1.5rem;
+            border: 3px solid var(--border-light);
+            border-radius: 12px;
+            background: var(--accent-light);
+            font-weight: 700;
+            box-shadow: 3px 3px 0 rgba(0,0,0,0.1);
+            transition: all 0.1s;
+        }
+
+        body.dark-mode .card {
+            border-color: var(--border-dark);
+            background: var(--accent-dark);
+            box-shadow: 3px 3px 0 rgba(255,255,255,0.1);
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 4px 4px 8px rgba(0,0,0,0.15);
+        }
+
+        .card-icon {
+            font-size: 2rem;
+            margin-bottom: 0.75rem;
+            display: block;
+        }
+
+        .card-title {
+            font-weight: 800;
+            font-size: 0.95rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .card-desc {
+            font-size: 0.85rem;
+            opacity: 0.85;
+            font-weight: 600;
+            line-height: 1.6;
+        }
+
+        /* Two-column layout */
+        .two-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--content-gap);
+            align-items: start;
+        }
+
+        @media (max-width: 900px) {
+            .two-col {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .col-section {
+            display: flex;
+            flex-direction: column;
+            gap: var(--element-gap);
+        }
+
+        /* Box/highlight */
+        .highlight-box {
+            padding: 1.5rem;
+            border: 4px solid var(--border-light);
+            border-radius: 12px;
+            background: var(--accent-light-2);
+            font-weight: 700;
+            margin: var(--content-gap) 0;
+        }
+
+        body.dark-mode .highlight-box {
+            border-color: var(--border-dark);
+            background: var(--accent-dark-2);
+        }
+
+        .highlight-title {
+            font-weight: 800;
+            font-size: 1rem;
+            margin-bottom: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Images */
+        .slide-image {
+            max-width: 100%;
+            max-height: min(45vh, 350px);
+            object-fit: contain;
+            border: 3px solid var(--border-light);
+            border-radius: 12px;
+            box-shadow: 4px 4px 0 rgba(0,0,0,0.15);
+            margin: var(--content-gap) auto;
+        }
+
+        body.dark-mode .slide-image {
+            border-color: var(--border-dark);
+            box-shadow: 4px 4px 0 rgba(255,255,255,0.15);
+        }
+
+        /* Bullet list */
+        ul {
+            margin: var(--element-gap) 0;
+            list-style: none;
+        }
+
+        ul li {
+            margin-left: 1.5rem;
+            position: relative;
+        }
+
+        ul li:before {
+            content: "▮";
+            position: absolute;
+            left: -1.5rem;
+            font-weight: 800;
+            opacity: 0.7;
+        }
+
+        /* ===========================================
+           NAVIGATION
+           =========================================== */
+        .nav-dots {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+            z-index: 1000;
+        }
+
+        .nav-dot {
+            width: 12px;
+            height: 12px;
+            border: 2px solid var(--text-light);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: transparent;
+        }
+
+        body.dark-mode .nav-dot {
+            border-color: var(--text-dark);
+        }
+
+        .nav-dot.active {
+            background: var(--text-light);
+            transform: scale(1.3);
+        }
+
+        body.dark-mode .nav-dot.active {
+            background: var(--text-dark);
+        }
+
+        .slide-counter {
+            position: fixed;
+            bottom: 2rem;
+            left: 2rem;
+            font-size: var(--small-size);
+            font-weight: 800;
+            letter-spacing: 1px;
+            opacity: 0.7;
+            z-index: 1000;
+        }
+
+        /* ===========================================
+           ANIMATIONS
+           =========================================== */
+        .reveal {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.6s cubic-bezier(0.34, 1.56, 0.64, 1),
+                        transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .slide.visible .reveal {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .reveal:nth-child(1) { transition-delay: 0s; }
+        .reveal:nth-child(2) { transition-delay: 0.08s; }
+        .reveal:nth-child(3) { transition-delay: 0.16s; }
+        .reveal:nth-child(4) { transition-delay: 0.24s; }
+        .reveal:nth-child(5) { transition-delay: 0.32s; }
+        .reveal:nth-child(6) { transition-delay: 0.4s; }
+
+        /* ===========================================
+           RESPONSIVE
+           =========================================== */
+        @media (max-height: 700px) {
+            :root {
+                --slide-padding: clamp(1.5rem, 3vw, 2rem);
+                --content-gap: clamp(0.6rem, 1.2vw, 1.2rem);
+                --title-size: clamp(1.6rem, 5vw, 2.2rem);
+            }
+        }
+
+        @media (max-height: 600px) {
+            :root {
+                --slide-padding: clamp(1rem, 2vw, 1.5rem);
+            }
+
+            .nav-dots, .slide-counter {
+                display: none;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .mode-toggle {
+                top: 1rem;
+                right: 1rem;
+                padding: 0.6rem 1.2rem;
+                font-size: 0.65rem;
+            }
+
+            .grid-2, .grid-3 {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                transition-duration: 0.2s !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <button class="mode-toggle" onclick="toggleDarkMode()">🌙 DARK</button>
+    <div class="slide-counter"><span id="current">1</span> / 14</div>
+
+    <!-- SLIDE 1: TITLE -->
+    <section class="slide">
+        <div class="slide-content">
+            <h1 class="reveal">POINT CLOUD WORKSHOP</h1>
+            <h1 class="reveal">AT SVCU 🌏.</h1>
+            <div class="divider reveal"></div>
+            <p class="reveal subtitle">🎮 A Comprehensive Introduction to 3D Data Analysis</p>
+            <div style="margin-top: var(--content-gap);">
+                <p class="reveal subtitle"><strong>👤 Presenter:</strong> Natapong Intarasuk</p>
+                <p class="reveal subtitle"><strong>🎓 Institution:</strong> Chulalongkorn University</p>
+                <p class="reveal subtitle"><strong>📧 Contact:</strong> int.natapong@gmail.com</p>
+                <p class="reveal subtitle"><strong>🐙 GitHub:</strong> <a href="https://github.com/imtorrr" target="_blank" style="color: inherit; text-decoration: underline;">github.com/imtorrr</a></p>
+            </div>
+        </div>
+    </section>
+
+    <!-- SLIDE 2: AGENDA -->
+    <section class="slide">
+        <div class="slide-content">
+            <h2 class="reveal">📋 TODAY'S AGENDA</h2>
+            <div class="divider reveal"></div>
+            <div class="grid-2 reveal" style="margin-top: var(--content-gap);">
+                <div class="card">
+                    <div class="card-icon">✨</div>
+                    <div class="card-title">Fundamentals</div>
+                    <div class="card-desc">Understand what point clouds are and their unique properties</div>
+                </div>
+                <div class="card">
+                    <div class="card-icon">🤔</div>
+                    <div class="card-title">Challenges</div>
+                    <div class="card-desc">Why 3D data is harder to analyze than 2D images</div>
+                </div>
+                <div class="card">
+                    <div class="card-icon">📊</div>
+                    <div class="card-title">Analysis</div>
+                    <div class="card-desc">Feature extraction and geometric descriptors</div>
+                </div>
+                <div class="card">
+                    <div class="card-icon">🧠</div>
+                    <div class="card-title">Deep Learning</div>
+                    <div class="card-desc">PointNet and PointNet++ architectures</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SLIDE 3: POINT CLOUD DEFINITION -->
+    <section class="slide">
+        <div class="slide-content">
+            <h2 class="reveal">❓ WHAT IS A POINT CLOUD?</h2>
+            <div class="divider reveal"></div>
+
+            <div class="two-col reveal">
+                <div class="col-section">
+                    <div class="highlight-box">
+                        <div class="highlight-title">Definition</div>
+                        <p>A point cloud is an <strong>unstructured collection of 3D points</strong> in space, each defined by X, Y, Z coordinates.</p>
+                    </div>
+                    <p><strong>Data Representation:</strong></p>
+                    <ul>
+                        <li>Format: 2D array shape (N, 3)</li>
+                        <li>N = number of points</li>
+                        <li>3 = coordinate dimensions (X, Y, Z)</li>
+                    </ul>
+                </div>
+
+                <div class="col-section">
+                    <p><strong>Beyond Geometry:</strong></p>
+                    <ul>
+                        <li><strong>Intensity:</strong> Signal strength from sensors</li>
+                        <li><strong>RGB Color:</strong> Per-point color information</li>
+                        <li><strong>Timestamp:</strong> When each point was captured</li>
+                        <li><strong>Normal:</strong> Surface orientation vector</li>
+                    </ul>
+                    <p style="margin-top: var(--content-gap);"><strong>Acquisition Methods:</strong></p>
+                    <ul>
+                        <li>LiDAR scanning (airborne/terrestrial)</li>
+                        <li>RGB-D cameras (Kinect, Intel RealSense)</li>
+                        <li>Photogrammetry (SfM)</li>
+                        <li>Structured light</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SLIDE 4: FILE I/O OPERATIONS -->
+    <section class="slide">
+        <div class="slide-content">
+            <h2 class="reveal">💾 FILE FORMAT COMPARISON</h2>
+            <div class="divider reveal"></div>
+
+            <div class="grid-3 reveal">
+                <div class="card">
+                    <div class="card-icon">📄</div>
+                    <div class="card-title">ASCII Formats</div>
+                    <div class="card-desc">
+                        <strong>.xyz, .txt, .csv</strong><br><br>
+                        ✅ Human readable<br>
+                        ✅ Universal compatibility<br>
+                        ❌ Large file sizes<br>
+                        ❌ No metadata<br>
+                        ❌ Slow I/O
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-icon">📦</div>
+                    <div class="card-title">LAS/LAZ Formats</div>
+                    <div class="card-desc">
+                        <strong>.las, .laz</strong><br><br>
+                        ✅ Industry standard<br>
+                        ✅ Metadata support<br>
+                        ✅ Compression (LAZ)<br>
+                        ❌ Not human readable<br>
+                        ❌ Limited mesh support
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-icon">🎮</div>
+                    <div class="card-title">Binary Formats</div>
+                    <div class="card-desc">
+                        <strong>.ply, .e57, .obj, .npy</strong><br><br>
+                        ✅ Flexible structure<br>
+                        ✅ Mesh + cloud<br>
+                        ✅ Fast I/O<br>
+                        ❌ Limited standard<br>
+                        ❌ Software dependent
+                    </div>
+                </div>
+            </div>
+
+            <img src="assets/file format.png" alt="File Format Comparison" class="slide-image reveal" style="margin-top: var(--content-gap); max-height: min(55vh, 450px);">
+        </div>
+    </section>
+
+    <!-- SLIDE 5: WHY DIFFICULT -->
+    <section class="slide">
+        <div class="slide-content">
+            <h2 class="reveal">🤔 WHY IS 3D ANALYSIS HARDER?</h2>
+            <div class="divider reveal"></div>
+
+            <div class="feature-list reveal">
+                <div class="feature-item">
+                    <div class="feature-item-title">🏗️ UNSTRUCTURED DATA</div>
+                    <div class="feature-item-desc">
+                        Points are scattered irregularly in space with <strong>no inherent grid structure</strong>. Unlike 2D images with pixel grids, there's no built-in neighbor relationship. This breaks traditional CNN architectures designed for regular grids.
+                    </div>
+                </div>
+
+                <div class="feature-item">
+                    <div class="feature-item-title">🔄 PERMUTATION INVARIANCE</div>
+                    <div class="feature-item-desc">
+                        The order of points is <strong>irrelevant</strong>. A point cloud with points [P1, P2, P3] is identical to [P3, P1, P2]. This property requires special network architectures that can handle permutation-invariant operations.
+                    </div>
+                </div>
+
+                <div class="feature-item">
+                    <div class="feature-item-title">📏 SCALE AND TRANSLATION VARIANCE</div>
+                    <div class="feature-item-desc">
+                        A coffee cup and a building can have <strong>identical spatial structure</strong> — only coordinates differ. Networks must learn scale-invariant and translation-invariant features to distinguish meaningful patterns from absolute positions.
+                    </div>
+                </div>
+
+                <div class="feature-item">
+                    <div class="feature-item-title">💾 MEMORY & COMPUTATION</div>
+                    <div class="feature-item-desc">
+                        Point clouds can contain millions of points. <strong>Processing all points directly</strong> requires massive memory and computation. Efficient sampling and hierarchical methods are essential.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SLIDE 6: NEIGHBORHOOD CONCEPT -->
+    <section class="slide">
+        <div class="slide-content">
+            <h2 class="reveal">🔗 THE NEIGHBORHOOD CONCEPT</h2>
+            <div class="divider reveal"></div>
+
+            <div class="highlight-box reveal">
+                <div class="highlight-title">Key Insight</div>
+                <p><strong>A single point's coordinates alone tell you nothing.</strong> Feature extraction happens by analyzing its <strong>local neighborhood</strong>.</p>
+            </div>
+
+            <div class="grid-2 reveal">
+                <div class="card">
+                    <div class="card-icon">📍</div>
+                    <div class="card-title">Line Pattern</div>
+                    <div class="card-desc">Neighbors aligned in a line → Edge, pole, or thin structure (eigenvalue: λ1 >> λ2, λ3)</div>
+                </div>
+                <div class="card">
+                    <div class="card-icon">📐</div>
+                    <div class="card-title">Planar Pattern</div>
+                    <div class="card-desc">Neighbors form a plane → Roof, wall, or flat surface (λ1 ≈ λ2 >> λ3)</div>
+                </div>
+                <div class="card">
+                    <div class="card-icon">🌳</div>
+                    <div class="card-title">Volume Pattern</div>
+                    <div class="card-desc">Neighbors scattered 3D → Vegetation or dense cluster (λ1 ≈ λ2 ≈ λ3)</div>
+                </div>
+                <div class="card">
+                    <div class="card-icon">🎯</div>
+                    <div class="card-title">Geometric Features</div>
+                    <div class="card-desc">PCA eigenvalues reveal local geometry for classification</div>
+                </div>
+            </div>
+
+            <p class="reveal" style="margin-top: var(--content-gap); font-weight: 800; text-align: center;">💡 Feature extraction = Bridge from raw 3D data to machine intelligence</p>
+        </div>
+    </section>
+
+    <!-- SLIDE 7: KD-TREES -->
+    <section class="slide">
+        <div class="slide-content">
+            <h2 class="reveal">🌳 SPATIAL QUERIES & KD-TREES</h2>
+            <div class="divider reveal"></div>
+
+            <p class="reveal"><strong>Why spatial queries matter:</strong> Efficiently finding neighbors is critical for feature computation. Brute force O(n²) is impractical for million-point clouds.</p>
+
+            <div class="grid-2 reveal">
+                <div class="feature-item">
+                    <div class="feature-item-title">🎯 K-Nearest Neighbors (KNN)</div>
+                    <div class="feature-item-desc">
+                        <strong>Goal:</strong> Find exactly K closest points to query point<br>
+                        <strong>Pros:</strong> Fixed neighborhood size, consistent density<br>
+                        <strong>Cons:</strong> Ignores scale, might include distant outliers<br>
+                        <strong>Typical K:</strong> 10-50 neighbors<br>
+                        <strong>Complexity:</strong> O(n log n) with KD-tree
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-item-title">⭕ Radius Search</div>
+                    <div class="feature-item-desc">
+                        <strong>Goal:</strong> Find all points within fixed radius<br>
+                        <strong>Pros:</strong> Physically meaningful, scale-aware<br>
+                        <strong>Cons:</strong> Variable neighbor count<br>
+                        <strong>Typical radius:</strong> 0.1-1.0 meters<br>
+                    </div>
+                </div>
+            </div>
+
+            <div class="highlight-box reveal">
+                <div class="highlight-title">Algorithm Insight</div>
+                <p>KD-tree partitions space recursively, reducing search from O(n) to O(log n) on average. Essential for real-time processing!</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- SLIDE 8: GEOMETRIC FEATURES -->
+    <section class="slide">
+        <div class="slide-content">
+            <h2 class="reveal">📊 COMPUTING GEOMETRIC FEATURES</h2>
+            <div class="divider reveal"></div>
+
+            <p class="reveal"><strong>Method: Principal Component Analysis (PCA)</strong></p>
+            <p class="reveal">After finding neighborhoods with KD-tree, extract shape descriptors via eigenvector analysis</p>
+
+            <div class="grid-2 reveal">
+                <div class="feature-item">
+                    <div class="feature-item-title">Eigenvalue Analysis</div>
+                    <div class="feature-item-desc">
+                        Sort eigenvalues: λ₁ ≥ λ₂ ≥ λ₃<br><br>
+                        <strong>Linearity:</strong> (λ₁ - λ₂) / λ₁<br>
+                        <strong>Planarity:</strong> (λ₂ - λ₃) / λ₁<br>
+                        <strong>Scattering:</strong> λ₃ / λ₁<br><br>
+                        Classify each point type!
+                    </div>
+                </div>
+
+                <div class="feature-item">
+                    <div class="feature-item-title">Derived Features</div>
+                    <div class="feature-item-desc">
+                        <strong>Surface Normal:</strong> Smallest eigenvector<br>
+                        <strong>Curvature:</strong> λ₃ / (λ₁ + λ₂ + λ₃)<br>
+                        <strong>Roughness:</strong> Deviation from plane<br>
+                        <strong>Verticality:</strong> Angle with Z-axis<br><br>
+                        Perfect for semantic labeling!
+                    </div>
+                </div>
+            </div>
+
+            <p class="reveal"><strong>Typical Workflow:</strong></p>
+            <ul class="reveal">
+                <li>Point cloud → KD-tree construction</li>
+                <li>For each point: Find K neighbors or within radius</li>
+                <li>Covariance matrix computation</li>
+                <li>PCA decomposition (eigenvalues/vectors)</li>
+                <li>Feature extraction & classification</li>
+            </ul>
+        </div>
+    </section>
+
+    <!-- SLIDE 9: CLOUDCOMPARE -->
+    <section class="slide">
+        <div class="slide-content">
+            <h2 class="reveal">☁️ CLOUDCOMPARE: PRACTICAL WORKFLOW</h2>
+            <div class="divider reveal"></div>
+
+            <div class="grid-2 reveal">
+                <div class="col-section">
+                    <h3>Workflow Steps:</h3>
+                    <div class="feature-list">
+                        <div class="feature-item">
+                            <div class="feature-item-title">1️⃣ Import Data</div>
+                            <div class="feature-item-desc">Load LAS, PLY, XYZ, or other formats. Preview point count, density, and bounds.</div>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-item-title">2️⃣ Clean Data</div>
+                            <div class="feature-item-desc">Remove outliers, noise, and erroneous points using statistical filters.</div>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-item-title">3️⃣ Subsample</div>
+                            <div class="feature-item-desc">Reduce density with spatial subsampling to manage computational load.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-section">
+                    <div class="feature-list">
+                        <div class="feature-item">
+                            <div class="feature-item-title">4️⃣ Compute Features</div>
+                            <div class="feature-item-desc">Calculate normals, curvature, eigenvalues via PCA on neighbors.</div>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-item-title">5️⃣ Export Results</div>
+                            <div class="feature-item-desc">Save as CSV, PLY with computed features ready for ML pipelines.</div>
+                        </div>
+						<img src="assets/slide9_img2.png" alt="CloudCompare interface" class="slide-image reveal">
+                    </div>
+                </div>
+            </div>
+
+            
+        </div>
+    </section>
+
+    <!-- SLIDE 10: MACHINE LEARNING -->
+    <section class="slide">
+        <div class="slide-content">
+            <h2 class="reveal">🧠 MACHINE LEARNING APPROACHES</h2>
+            <div class="divider reveal"></div>
+
+            <div class="highlight-box reveal">
+                <div class="highlight-title">Traditional Pipeline</div>
+                <p>Manual feature extraction → Classical ML (Random Forest, SVM, etc.) ← Works but requires domain expertise</p>
+            </div>
+
+            <div class="highlight-box reveal" style="margin-top: var(--content-gap);">
+                <div class="highlight-title">Modern Deep Learning Pipeline</div>
+                <p>Raw point cloud → Neural network (PointNet/PointNet++) → Learned features → Classification ← Automatic & powerful</p>
+            </div>
+
+            <p class="reveal" style="margin-top: var(--content-gap);"><strong>📚 Key Resources for Learning:</strong></p>
+            <div class="feature-list reveal">
+                <a href="https://medium.com/data-science/3d-machine-learning-course-point-cloud-semantic-segmentation-9b32618ca5df" class="resource-link" target="_blank">
+                    <div class="feature-item">
+                        <div class="feature-item-title">📖 Medium Articles</div>
+                        <div class="feature-item-desc">3D Machine Learning course on semantic segmentation and best practices</div>
+                    </div>
+                </a>
+                <a href="https://github.com/uav4geo/OpenPointClass" class="resource-link" target="_blank">
+                    <div class="feature-item">
+                        <div class="feature-item-title">🔗 OpenPointClass Repository</div>
+                        <div class="feature-item-desc">GitHub project for point cloud semantic classification with multiple networks</div>
+                    </div>
+                </a>
+                <a href="https://arxiv.org/pdf/1705.08374" class="resource-link" target="_blank">
+                    <div class="feature-item">
+                        <div class="feature-item-title">📑 Research Papers from Pix4D</div>
+                        <div class="feature-item-desc">CLASSIFICATION OF AERIAL PHOTOGRAMMETRIC 3D POINT CLOUDS</div>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- SLIDE 11: PROPERTIES OF POINT SET IN R^N -->
+    <section class="slide">
+        <div class="slide-content">
+            <h2 class="reveal">📐 PROPERTIES OF POINT SET IN ℝⁿ</h2>
+            <div class="divider reveal"></div>
+
+            <div class="highlight-box reveal">
+                <div class="highlight-title">Permutation Invariance</div>
+                <p>Order of points doesn't matter. {P₁, P₂, P₃} = {P₃, P₁, P₂}. A good network should produce same output regardless of input order.</p>
+            </div>
+
+            <div class="highlight-box reveal" style="margin-top: var(--content-gap);">
+                <div class="highlight-title">Translation Invariance</div>
+                <p>Shifting all points by the same vector shouldn't affect local geometric properties. Networks should be robust to coordinate shifts.</p>
+            </div>
+
+            <div class="feature-grid reveal" style="margin-top: var(--content-gap);">
+                <div class="feature-item">
+                    <div class="feature-item-title">🎯 Global Structure</div>
+                    <div class="feature-item-desc">Aggregate local features via symmetry functions (max pooling, sum pooling) to capture global shape</div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-item-title">🔗 Local Dependencies</div>
+                    <div class="feature-item-desc">Nearby points in 3D space relate to each other. Use neighborhoods (KNN, radius) to capture local structure</div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-item-title">⚙️ Rotation Sensitivity</div>
+                    <div class="feature-item-desc">Networks are generally NOT rotation invariant. Use data augmentation or alignment preprocessing</div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-item-title">📊 Unordered Set</div>
+                    <div class="feature-item-desc">Points are unordered collection, not sequences. Requires symmetric aggregation functions</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SLIDE 12: POINTNET -->
+    <section class="slide">
+        <div class="slide-content">
+            <h2 class="reveal">🔴 POINTNET: REVOLUTIONIZING 3D LEARNING <a href="https://colab.research.google.com/drive/12RQDCV7krZtfjwJ0B4bOEBnvnDHTu-k2?usp=sharing" target="_blank" style="text-decoration: none;"><img src="assets/colab icon.png" alt="Open in Colab" style="height: 1.2em; display: inline; margin-left: 0.5em; vertical-align: middle; cursor: pointer; transition: opacity 0.2s;"></a></h2>
+            <div class="divider reveal"></div>
+
+            <div class="two-col reveal">
+                <div class="col-section">
+                    <h3>Key Innovation:</h3>
+                    <p><strong>Direct point cloud processing without voxelization</strong></p>
+                    <p>Processes raw (N, 3) point coordinates directly instead of converting to voxels or meshes. Maintains sparse nature of data.</p>
+
+                    <h3 style="margin-top: var(--content-gap);">Architecture:</h3>
+                    <ul>
+                        <li>Input: N × 3 point cloud</li>
+                        <li>MLP on each point independently</li>
+                        <li>Max pooling aggregation (permutation invariant!)</li>
+                        <li>Global feature vector</li>
+                        <li>Classification or segmentation head</li>
+                    </ul>
+                </div>
+
+                <div class="col-section">
+                    <h3>Advantages:</h3>
+                    <ul>
+                        <li>Simple & elegant architecture</li>
+                        <li>Permutation invariant aggregation</li>
+                        <li>Direct on raw coordinates</li>
+                        <li>Theoretically proven expressiveness</li>
+                    </ul>
+
+                    <h3 style="margin-top: var(--content-gap);">Limitations:</h3>
+                    <ul>
+                        <li>No local structure learning</li>
+                        <li>Sensitive to outliers</li>
+                        <li>Struggles with large point clouds</li>
+                        <li>Limited contextual understanding</li>
+                    </ul>
+
+                    <p style="margin-top: var(--content-gap); font-weight: 800; font-style: italic;">💡 Breakthrough: Proved CNNs aren't necessary for 3D learning!</p>
+                </div>
+            </div>
+
+            <img src="assets/pointnet.png" alt="PointNet Architecture" class="slide-image reveal" style="margin-top: var(--content-gap); max-height: min(40vh, 300px);">
+
+            <p class="reveal" style="margin-top: var(--content-gap); font-weight: 800; font-size: 0.9rem;">📚 Learn More:</p>
+            <div class="feature-list reveal" style="margin-top: 0.5rem;">
+                <a href="https://datascienceub.medium.com/pointnet-implementation-explained-visually-c7e300139698" target="_blank" class="resource-link">
+                    <div class="feature-item">
+                        <div class="feature-item-title">📖 PointNet Implementation Explained Visually</div>
+                        <div class="feature-item-desc">DataScienceUB on Medium - Visual explanation of PointNet implementation</div>
+                    </div>
+                </a>
+                <a href="https://medium.com/@itberrios6/introduction-to-point-net-d23f43aa87d2" target="_blank" class="resource-link">
+                    <div class="feature-item">
+                        <div class="feature-item-title">📖 Introduction to PointNet</div>
+                        <div class="feature-item-desc">By itberrios6 on Medium - Comprehensive introduction to PointNet architecture</div>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- SLIDE 13: POINTNET++ -->
+    <section class="slide">
+        <div class="slide-content">
+            <h2 class="reveal">🟢 POINTNET++: HIERARCHICAL LEARNING <a href="https://colab.research.google.com/drive/18zkBVxE_yPiiUyWWTiMz59cvo8jUjvvG?usp=sharing" target="_blank" style="text-decoration: none;"><img src="assets/colab icon.png" alt="Open in Colab" style="height: 1.2em; display: inline; margin-left: 0.5em; vertical-align: middle; cursor: pointer; transition: opacity 0.2s;"></a></h2>
+            <div class="divider reveal"></div>
+
+            <p class="reveal"><strong>Answer to PointNet's limitations:</strong> Learn hierarchical features at multiple scales</p>
+
+            <div class="grid-2 reveal">
+                <div class="col-section">
+                    <h3>Multi-Scale Approach:</h3>
+                    <ul>
+                        <li><strong>Set Abstraction Levels:</strong> Recursively partition space</li>
+                        <li><strong>PointNet++ learns:</strong> Local features at each level</li>
+                        <li><strong>Coarse-to-fine:</strong> Aggregate features bottom-up</li>
+                        <li><strong>Context modeling:</strong> Understand neighborhoods + global structure</li>
+                    </ul>
+
+                    <h3 style="margin-top: var(--content-gap);">Key Components:</h3>
+                    <ul>
+                        <li>Sampling layer (fps)</li>
+                        <li>Grouping layer (KNN/radius)</li>
+                        <li>PointNet feature extraction</li>
+                        <li>Feature propagation on upsampling</li>
+                    </ul>
+                </div>
+
+                <div class="col-section">
+                    <h3>Advantages Over PointNet:</h3>
+                    <ul>
+                        <li>Learns hierarchical features</li>
+                        <li>Captures multi-scale structure</li>
+                        <li>Better contextual understanding</li>
+                        <li>More robust to noise</li>
+                        <li>Superior segmentation accuracy</li>
+                    </ul>
+
+                    <h3 style="margin-top: var(--content-gap);">Use Cases:</h3>
+                    <ul>
+                        <li>Semantic segmentation (scene labeling)</li>
+                        <li>Instance segmentation</li>
+                        <li>Object detection in 3D</li>
+                        <li>Fine-grained shape analysis</li>
+                    </ul>
+
+                    <p style="margin-top: var(--content-gap); font-weight: 800;">🏆 State-of-the-art for most 3D understanding tasks</p>
+                </div>
+            </div>
+
+            <img src="assets/pointnet++.png" alt="PointNet++ Architecture" class="slide-image reveal" style="margin-top: var(--content-gap); max-height: min(40vh, 300px);">
+        </div>
+    </section>
+
+    <!-- SLIDE 14: REFERENCES & CLOSING -->
+    <section class="slide">
+        <div class="slide-content">
+            <h2 class="reveal">📚 REFERENCES & RESOURCES</h2>
+            <div class="divider reveal"></div>
+
+            <div class="grid-2 reveal">
+                <div class="col-section">
+                    <div class="feature-list">
+                        <div class="feature-item">
+                            <div class="feature-item-title">LinkedIn</div>
+                            <img src="assets/slide14_img4.png" alt="LinkedIn content" class="ref-img" style="margin-top: 0.5rem;">
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-item-title">Youtube, Medium</div>
+                            <img src="assets/slide14_img5.png" alt="Youtube Medium content" class="ref-img" style="margin-top: 0.5rem;">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-section">
+                    <div class="feature-list">
+                        <div class="feature-item">
+                            <div class="feature-item-title">Udemy Course</div>
+                            <img src="assets/slide14_img7.png" alt="Udemy content" class="ref-img" style="margin-top: 0.5rem;">
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-item-title">Youtube</div>
+                            <img src="assets/slide14_img9.png" alt="Youtube content" class="ref-img" style="margin-top: 0.5rem;">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="highlight-box reveal" style="margin-top: var(--content-gap); text-align: center;">
+                <h3 style="font-size: 2rem; margin-bottom: 0;">🎉 Thank You!</h3>
+                <p style="margin-top: var(--element-gap);">Questions? Let's explore the fascinating world of 3D point clouds together!</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Image Lightbox Modal -->
+    <div class="image-lightbox" id="imageLightbox">
+        <img class="lightbox-image" id="lightboxImg" src="" alt="Enlarged view">
+    </div>
+
+    <!-- Navigation -->
+    <nav class="nav-dots" id="navDots"></nav>
+
+    <script>
+        /* Dark mode */
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark-mode');
+            const btn = document.querySelector('.mode-toggle');
+            btn.textContent = document.body.classList.contains('dark-mode') ? '☀️ LIGHT' : '🌙 DARK';
+            localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
+        }
+
+        if (localStorage.getItem('darkMode') === 'true') {
+            document.body.classList.add('dark-mode');
+            document.querySelector('.mode-toggle').textContent = '☀️ LIGHT';
+        }
+
+        /* Slide navigation */
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const navDotsContainer = document.getElementById('navDots');
+
+        slides.forEach((_, index) => {
+            const dot = document.createElement('div');
+            dot.className = `nav-dot ${index === 0 ? 'active' : ''}`;
+            dot.onclick = () => goToSlide(index);
+            navDotsContainer.appendChild(dot);
+        });
+
+        function updateSlide() {
+            slides.forEach((slide, index) => {
+                if (index === currentSlide) {
+                    slide.classList.add('visible');
+                } else {
+                    slide.classList.remove('visible');
+                }
+            });
+
+            document.querySelectorAll('.nav-dot').forEach((dot, index) => {
+                dot.classList.toggle('active', index === currentSlide);
+            });
+
+            document.getElementById('current').textContent = currentSlide + 1;
+            slides[currentSlide].scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function goToSlide(n) {
+            currentSlide = (n + slides.length) % slides.length;
+            updateSlide();
+        }
+
+        function nextSlide() { goToSlide(currentSlide + 1); }
+        function prevSlide() { goToSlide(currentSlide - 1); }
+
+        /* Keyboard */
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') {
+                e.preventDefault();
+                nextSlide();
+            } else if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                prevSlide();
+            }
+        });
+
+        /* Touch */
+        let touchStartX = 0;
+        document.addEventListener('touchstart', (e) => {
+            touchStartX = e.touches[0].clientX;
+        });
+
+        document.addEventListener('touchend', (e) => {
+            const touchEndX = e.changedTouches[0].clientX;
+            if (touchStartX - touchEndX > 50) nextSlide();
+            else if (touchEndX - touchStartX > 50) prevSlide();
+        });
+
+        /* Mouse wheel */
+        document.addEventListener('wheel', (e) => {
+            if (e.deltaY > 0) nextSlide();
+            else prevSlide();
+        }, { passive: true });
+
+        updateSlide();
+
+        /* Image Lightbox - Zoom on hover */
+        const lightbox = document.getElementById('imageLightbox');
+        const lightboxImg = document.getElementById('lightboxImg');
+
+        // Wait for DOM to load then attach listeners
+        setTimeout(() => {
+            const refImages = document.querySelectorAll('.ref-img');
+            refImages.forEach(img => {
+                img.addEventListener('mouseenter', () => {
+                    lightboxImg.src = img.src;
+                    lightboxImg.alt = img.alt;
+                    lightbox.classList.add('active');
+                });
+
+                img.addEventListener('mouseleave', () => {
+                    lightbox.classList.remove('active');
+                });
+            });
+        }, 100);
+    </script>
+</body>
+</html>

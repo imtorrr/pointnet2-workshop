@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Style B: Soft Blue</title>
+    <link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=satoshi:400,500,700&f[]=dm-sans:400,500,700">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --bg-light: #f5f8fb;
+            --bg-light-accent: #eef3f9;
+            --text-light: #2c3e50;
+            --accent1: #5a9fd4;
+            --accent2: #8ec5f2;
+
+            --bg-dark: #1a1a2e;
+            --bg-dark-accent: #2d2d44;
+            --text-dark: #f0f0f0;
+        }
+
+        body {
+            font-family: 'Satoshi', sans-serif;
+            background: linear-gradient(135deg, var(--bg-light) 0%, var(--bg-light-accent) 100%);
+            color: var(--text-light);
+            transition: background 0.3s, color 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        body.dark-mode {
+            background: linear-gradient(135deg, var(--bg-dark) 0%, var(--bg-dark-accent) 100%);
+            color: var(--text-dark);
+        }
+
+        .preview-container {
+            width: 100%;
+            max-width: 1200px;
+            padding: 4rem;
+            border-radius: 24px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        body.dark-mode .preview-container {
+            background: rgba(26, 26, 46, 0.95);
+        }
+
+        .bg-decoration {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(90, 159, 212, 0.1) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+
+        .toggle-btn {
+            position: absolute;
+            top: 1.5rem;
+            right: 1.5rem;
+            padding: 0.6rem 1.2rem;
+            background: var(--accent1);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.875rem;
+            z-index: 10;
+        }
+
+        h1 {
+            font-family: 'DM Sans', sans-serif;
+            font-size: 3.5rem;
+            line-height: 1.2;
+            margin-bottom: 1rem;
+            color: var(--accent1);
+            position: relative;
+            z-index: 2;
+        }
+
+        body.dark-mode h1 {
+            color: var(--accent2);
+        }
+
+        p {
+            font-size: 1.125rem;
+            line-height: 1.7;
+            opacity: 0.85;
+            margin-top: 1.5rem;
+            position: relative;
+            z-index: 2;
+        }
+
+        .feature-badges {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-top: 2rem;
+            position: relative;
+            z-index: 2;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.75rem 1.5rem;
+            background: var(--accent1);
+            color: white;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        .badge.alt {
+            background: var(--accent2);
+            color: white;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .badge { animation: pulse 2s ease-in-out infinite; }
+        .badge:nth-child(2) { animation-delay: 0.2s; }
+        .badge:nth-child(3) { animation-delay: 0.4s; }
+
+        .color-info {
+            margin-top: 2rem;
+            padding: 1rem;
+            background: var(--accent1);
+            color: white;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            position: relative;
+            z-index: 2;
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-decoration"></div>
+    <button class="toggle-btn" onclick="toggleDarkMode()">🌙 Dark</button>
+
+    <div class="preview-container">
+        <h1>Soft Blue 💙</h1>
+        <p>Cool, calming blue tones. Perfect for technical content, professional yet friendly.</p>
+
+        <div class="feature-badges">
+            <span class="badge">Calm</span>
+            <span class="badge alt">Professional</span>
+            <span class="badge">Clear</span>
+        </div>
+
+        <div class="color-info">
+            🎨 Colors: Soft Blue (#5a9fd4) + Light Blue (#8ec5f2)
+        </div>
+    </div>
+
+    <script>
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark-mode');
+            const btn = document.querySelector('.toggle-btn');
+            btn.textContent = document.body.classList.contains('dark-mode') ? '☀️ Light' : '🌙 Dark';
+        }
+    </script>
+</body>
+</html>

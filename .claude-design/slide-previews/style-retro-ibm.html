@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Retro: IBM Keyboard</title>
+    <link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=figtree:600,700,800&f[]=cascadia-code:500,600">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --bg-light: #f5f1e8;
+            --text-light: #1a1a1a;
+            --accent-light: #d4c5b3;
+            --border-light: #333333;
+
+            --bg-dark: #1a1612;
+            --text-dark: #e8dcc8;
+            --accent-dark: #4a3f2e;
+            --border-dark: #7a6f5f;
+        }
+
+        body {
+            font-family: 'Figtree', sans-serif;
+            background: var(--bg-light);
+            color: var(--text-light);
+            transition: background 0.4s, color 0.4s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        body.dark-mode {
+            background: var(--bg-dark);
+            color: var(--text-dark);
+        }
+
+        .preview-container {
+            width: 100%;
+            max-width: 1200px;
+            padding: 4rem;
+            border: 4px solid var(--border-light);
+            border-radius: 16px;
+            position: relative;
+            background: var(--bg-light);
+            box-shadow: inset 0 0 0 2px var(--accent-light);
+        }
+
+        body.dark-mode .preview-container {
+            background: var(--bg-dark);
+            border-color: var(--border-dark);
+            box-shadow: inset 0 0 0 2px var(--accent-dark);
+        }
+
+        .toggle-btn {
+            position: absolute;
+            top: 1.5rem;
+            right: 1.5rem;
+            padding: 0.8rem 1.8rem;
+            background: var(--border-light);
+            color: var(--bg-light);
+            border: 3px solid var(--border-light);
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 800;
+            font-size: 0.75rem;
+            font-family: 'Cascadia Code', monospace;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        body.dark-mode .toggle-btn {
+            background: var(--border-dark);
+            color: var(--bg-dark);
+            border-color: var(--border-dark);
+        }
+
+        h1 {
+            font-family: 'Figtree', sans-serif;
+            font-size: 4rem;
+            line-height: 1;
+            margin-bottom: 0.5rem;
+            font-weight: 800;
+            letter-spacing: -1px;
+            text-transform: uppercase;
+        }
+
+        .tagline {
+            font-family: 'Cascadia Code', monospace;
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 2rem;
+            opacity: 0.8;
+        }
+
+        p {
+            font-size: 1.125rem;
+            line-height: 1.8;
+            margin-top: 1.5rem;
+            font-weight: 600;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+            margin-top: 2.5rem;
+        }
+
+        .feature-card {
+            padding: 1.75rem;
+            border: 3px solid var(--border-light);
+            border-radius: 12px;
+            background: var(--accent-light);
+            font-weight: 700;
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        body.dark-mode .feature-card {
+            border-color: var(--border-dark);
+            background: var(--accent-dark);
+        }
+
+        .feature-card .icon {
+            font-size: 1.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .accent-bar {
+            width: 100%;
+            height: 6px;
+            background: var(--border-light);
+            margin: 2rem 0;
+        }
+
+        body.dark-mode .accent-bar {
+            background: var(--border-dark);
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h1 { animation: slideIn 0.6s ease-out; }
+        p { animation: slideIn 0.6s ease-out 0.1s both; }
+        .feature-grid { animation: slideIn 0.6s ease-out 0.2s both; }
+    </style>
+</head>
+<body>
+    <button class="toggle-btn" onclick="toggleDarkMode()">⌥ DARK</button>
+
+    <div class="preview-container">
+        <h1>IBM RETRO</h1>
+        <div class="tagline">» Vintage keyboard aesthetic</div>
+        <div class="accent-bar"></div>
+
+        <p>Warm cream on dark background, or cool minimal light mode. Industrial, professional, timeless.</p>
+
+        <div class="feature-grid">
+            <div class="feature-card">
+                <div class="icon">⌨</div>
+                Vintage Tech
+            </div>
+            <div class="feature-card">
+                <div class="icon">◆</div>
+                Industrial
+            </div>
+            <div class="feature-card">
+                <div class="icon">⬛</div>
+                Bold Type
+            </div>
+            <div class="feature-card">
+                <div class="icon">▬</div>
+                Solid Forms
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark-mode');
+        }
+    </script>
+</body>
+</html>
