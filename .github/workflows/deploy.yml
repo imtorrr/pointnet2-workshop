@@ -29,5 +29,5 @@ jobs:
 
       - name: Deploy to GCS
         run: |
-          gsutil -m rsync -r -d index.html gs://pointnet2-workshop/
+          gsutil -m cp index.html gs://pointnet2-workshop/
           gsutil -m rsync -r -d assets/ gs://pointnet2-workshop/assets/
